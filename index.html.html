@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wine Expert OS Prototype</title>
+  <style>
+:root {
+  --bg: #f5efec;
+  --surface: #fffaf7;
+  --surface-2: #eee3df;
+  --brand: #721b32;
+  --brand-2: #8f2945;
+  --text: #272321;
+  --muted: #706a66;
+  --line: #ddcec9;
+  --success: #2f6b4f;
+  --success-bg: #edf6f1;
+  --error: #a43a3a;
+  --error-bg: #fbeeee;
+  --warning: #9b6b14;
+  --warning-bg: #fff7e6;
+  --shadow: 0 12px 30px rgba(55, 39, 29, .08);
+  --radius: 18px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: "Segoe UI", Arial, Helvetica, "Yu Gothic UI", "Yu Gothic", Meiryo, sans-serif; font-synthesis: none; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+.app-shell { min-height: 100vh; display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+.sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 18px; background: linear-gradient(180deg, #35131f 0%, #24171b 100%); color: #fff8f2; display: flex; flex-direction: column; }
+.logo { font-family: Georgia, "Times New Roman", serif; font-size: 20px; letter-spacing: .08em; line-height: 1.35; margin: 2px 8px 28px; }
+.logo small { display: block; margin-top: 6px; font-family: inherit; font-size: 10px; letter-spacing: .22em; opacity: .65; }
+.nav { display: grid; gap: 8px; }
+.nav button { border: 0; border-radius: 12px; background: transparent; color: inherit; padding: 12px 14px; text-align: left; display: flex; align-items: center; gap: 10px; }
+.nav button:hover, .nav button.active { background: rgba(255,255,255,.1); }
+.nav .secondary { opacity: .6; }
+.sidebar-note { margin-top: auto; font-size: 11px; line-height: 1.6; opacity: .62; padding: 14px 8px 0; border-top: 1px solid rgba(255,255,255,.12); }
+.main { width: 100%; max-width: 1100px; margin: 0 auto; padding: 34px 34px 110px; }
+.mobile-header, .bottom-nav { display: none; }
+.eyebrow { font-size: 12px; letter-spacing: .13em; text-transform: uppercase; color: var(--brand); font-weight: 800; }
+h1 { margin: 7px 0 9px; font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif; font-size: clamp(30px, 4vw, 48px); line-height: 1.15; font-weight: 600; }
+h2 { margin: 0; font-size: 20px; }
+h3 { margin: 0 0 10px; font-size: 15px; }
+p { line-height: 1.75; }
+.page-lead { color: var(--muted); margin: 0 0 26px; }
+.grid { display: grid; gap: 18px; }
+.grid.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.grid.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+.card.flat { box-shadow: none; }
+.hero-card { padding: 28px; background: linear-gradient(135deg, #fff9f6 0%, #f0dce1 58%, #ead1d8 100%); border-color: #d9bcc5; }
+.hero-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.metric-big { font-size: 36px; font-family: Georgia, serif; }
+.metric-label { color: var(--muted); font-size: 12px; }
+.stat-line { display: flex; flex-wrap: wrap; gap: 14px; margin: 15px 0 22px; color: var(--muted); }
+.stat-line strong { color: var(--text); }
+.btn { min-height: 46px; border-radius: 12px; padding: 0 18px; border: 1px solid transparent; font-weight: 800; transition: .15s ease; }
+.btn.primary { background: var(--brand); color: white; }
+.btn.primary:hover { background: var(--brand-2); transform: translateY(-1px); }
+.btn.secondary { background: var(--surface); border-color: var(--brand); color: var(--brand); }
+.btn.ghost { background: transparent; color: var(--brand); }
+.btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+.section { margin-top: 26px; }
+.section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.section-kicker { font-size: 12px; color: var(--muted); }
+.topic-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+.topic-row:first-child { border-top: 0; }
+.progress { height: 7px; background: var(--surface-2); border-radius: 999px; overflow: hidden; width: 120px; }
+.progress > span { display: block; height: 100%; background: var(--brand); border-radius: inherit; }
+.chip { display: inline-flex; align-items: center; min-height: 28px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 700; }
+.chip.brand { background: #ecd4db; color: #68172d; }
+.chip.success { background: var(--success-bg); color: var(--success); }
+.chip.warning { background: var(--warning-bg); color: var(--warning); }
+.quiz-shell { max-width: 800px; margin: 0 auto; }
+.quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; color: var(--muted); }
+.question { font-family: Georgia, "Yu Mincho", serif; font-size: clamp(25px, 4vw, 36px); line-height: 1.45; margin: 18px 0 24px; }
+.choice-list { display: grid; gap: 12px; }
+.choice { width: 100%; min-height: 58px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 14px 16px; text-align: left; display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 10px; }
+.choice:hover { border-color: #b89aa5; }
+.choice.selected { border: 2px solid var(--brand); background: #f7e9ed; }
+.choice.correct { border: 2px solid var(--success); background: var(--success-bg); }
+.choice.wrong { border: 2px solid var(--error); background: var(--error-bg); }
+.choice-key { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-weight: 800; }
+.choice-label { display: flex; flex-direction: column; min-width: 0; }
+.choice-local { font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-size: 17px; line-height: 1.4; font-weight: 700; letter-spacing: 0; font-synthesis: none; font-variant-ligatures: none; }
+.choice-ja { font-family: "Yu Gothic UI", "Yu Gothic", Meiryo, "Segoe UI", sans-serif; margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.choice.selected .choice-ja { color: #7c4c5d; }
+
+.confidence { margin-top: 24px; }
+.confidence-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+.confidence-grid button { min-height: 46px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.confidence-grid button.selected { border: 2px solid var(--brand); color: var(--brand); background: #f7e9ed; font-weight: 800; }
+.quiz-actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+.result-banner { border-radius: var(--radius); padding: 22px; display: flex; gap: 14px; align-items: center; }
+.result-banner.success { background: var(--success-bg); color: var(--success); border: 1px solid #c9dfd4; }
+.result-banner.error { background: var(--error-bg); color: var(--error); border: 1px solid #e9c7c7; }
+.result-icon { font-size: 28px; }
+.divider { height: 1px; background: var(--line); margin: 20px 0; }
+.source-ref { display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; background: #fff; }
+.source-ref small { display: block; color: var(--muted); margin-top: 4px; }
+.accordion { border-top: 1px solid var(--line); }
+.accordion button { width: 100%; padding: 16px 0; border: 0; background: transparent; text-align: left; display: flex; justify-content: space-between; font-weight: 800; }
+.accordion-content { padding: 0 0 16px; color: var(--muted); }
+.review-summary { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+.review-item { padding: 16px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 16px; }
+.review-meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+.searchbar { display: flex; gap: 10px; margin: 20px 0 14px; }
+.searchbar input { flex: 1; min-height: 54px; border: 1px solid var(--line); border-radius: 14px; padding: 0 16px; background: var(--surface); color: var(--text); }
+.browse { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-box { border-left: 4px solid var(--brand); background: var(--surface); padding: 18px 20px; border-radius: 0 14px 14px 0; }
+.ai-label { font-size: 11px; letter-spacing: .12em; color: var(--brand); font-weight: 900; }
+.fact-table { display: grid; }
+.fact-row { display: grid; grid-template-columns: minmax(130px, .45fr) 1fr; gap: 14px; padding: 13px 0; border-top: 1px solid var(--line); }
+.fact-row:first-child { border-top: 0; }
+.fact-row .label { color: var(--muted); font-size: 13px; }
+.breadcrumb { color: var(--muted); font-size: 13px; }
+.linkish { color: var(--brand); font-weight: 800; border: 0; background: transparent; padding: 0; }
+.mock-note { color: var(--warning); background: var(--warning-bg); border: 1px solid #efdfb5; border-radius: 12px; padding: 12px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 18px; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(24,18,18,.5); z-index: 50; display: grid; place-items: center; padding: 20px; }
+.modal { width: min(720px, 100%); max-height: 84vh; overflow: auto; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 70px rgba(0,0,0,.24); padding: 24px; }
+.modal-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; }
+.close { border: 0; background: var(--surface-2); width: 36px; height: 36px; border-radius: 50%; }
+.sticky-next { display: none; }
+@media (max-width: 860px) {
+  .app-shell { display: block; }
+  .sidebar { display: none; }
+  .mobile-header { position: sticky; top: 0; z-index: 20; display: flex; height: 58px; align-items: center; justify-content: space-between; padding: 0 18px; background: rgba(250,243,240,.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .mobile-header .logo { margin: 0; font-size: 15px; color: var(--brand); }
+  .mobile-header .logo small { display: none; }
+  .main { padding: 24px 18px 108px; }
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; height: 70px; display: grid; grid-template-columns: repeat(4,1fr); background: rgba(255,249,246,.97); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  .bottom-nav button { border: 0; background: transparent; color: var(--muted); font-size: 11px; font-weight: 800; }
+  .bottom-nav button.active { color: var(--brand); }
+  .grid.two, .grid.three { grid-template-columns: 1fr; }
+  .confidence-grid { grid-template-columns: repeat(2,1fr); }
+  .topic-row { grid-template-columns: 1fr auto; }
+  .topic-row .progress { grid-column: 1 / -1; width: 100%; }
+  .review-summary { align-items: flex-start; flex-direction: column; }
+  .searchbar { flex-direction: column; }
+  .fact-row { grid-template-columns: 1fr; gap: 5px; }
+  .quiz-actions .btn.primary { width: 100%; }
+  .sticky-next { display: block; position: fixed; z-index: 25; left: 16px; right: 16px; bottom: 82px; }
+  .sticky-next .btn { width: 100%; box-shadow: 0 12px 30px rgba(75,30,47,.25); }
+}
+
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="modal-root"></div>
+  <script>
+const demoQuestions = [
+  {
+    id: 'q1', topic: 'Slovenia', text: 'スロヴェニアで最も西に位置する産地は？',
+    choices: [
+      {local:'Podravje', ja:'ポドラウイェ'},
+      {local:'Posavje', ja:'ポサウイェ'},
+      {local:'Primorska', ja:'プリモルスカ'},
+      {local:'Štajerska Slovenija', ja:'シュタイエルスカ・スロヴェニア'}
+    ], correct: 2,
+    explanation: 'この文章は UI 設計書のワイヤーフレーム例を再現したプロトタイプ用データです。実際の試験知識としては、対象年度 J.S.A.教本による検証を行ってから Question を approved にする前提です。',
+    source: 'J.S.A.教本 p.xxx', related: ['Primorska', 'Slovenia']
+  },
+  {
+    id: 'q2', topic: 'Italy', text: 'プロトタイプ確認用：Barolo の主要品種として表示する項目は？',
+    choices: [
+      {local:'Nebbiolo', ja:'ネッビオーロ'},
+      {local:'Mock A', ja:'モックA'},
+      {local:'Mock B', ja:'モックB'},
+      {local:'Mock C', ja:'モックC'}
+    ], correct: 0,
+    explanation: 'UI の操作検証用です。知識内容の正本性を示すものではありません。',
+    source: 'J.S.A.教本 p.xxx', related: ['Barolo DOCG', 'Nebbiolo']
+  }
+];
+
+const state = {
+  screen: 'home',
+  quizIndex: 0,
+  selectedChoice: null,
+  confidence: null,
+  lastResult: null,
+  favorite: false,
+  reviewMode: false,
+  accordionOpen: false,
+  knowledgeQuery: '',
+  knowledgeSearched: false,
+  topic: 'Barolo DOCG'
+};
+
+const navItems = [
+  ['home','⌂','HOME'], ['quiz','▶','STUDY'], ['review','↻','REVIEW'], ['knowledge','⌕','KNOWLEDGE'],
+  ['analytics','◫','ANALYTICS'], ['mock','◷','MOCK EXAM']
+];
+
+function go(screen) {
+  if (['analytics','mock'].includes(screen)) return;
+  state.screen = screen;
+  if (screen === 'quiz') resetQuizSelections();
+  window.scrollTo({top:0, behavior:'smooth'});
+  render();
+}
+function resetQuizSelections(){ state.selectedChoice = null; state.confidence = null; state.lastResult = null; state.accordionOpen = false; }
+function startQuiz(reviewMode=false){ state.reviewMode = reviewMode; state.quizIndex = reviewMode ? 1 : 0; go('quiz'); }
+function submitAnswer(){
+  const q = demoQuestions[state.quizIndex];
+  if (state.selectedChoice === null || !state.confidence) return;
+  state.lastResult = {correct: state.selectedChoice === q.correct, selected: state.selectedChoice, confidence: state.confidence};
+  state.screen = 'result';
+  render();
+}
+function nextQuestion(){ state.quizIndex = (state.quizIndex + 1) % demoQuestions.length; state.reviewMode = false; go('quiz'); }
+function openTopic(name){ state.topic = name || 'Barolo DOCG'; state.screen = 'topic'; render(); }
+
+function shell(content){
+  const active = state.screen === 'result' ? 'quiz' : state.screen === 'topic' ? 'knowledge' : state.screen;
+  return `
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="logo">WINE EXPERT OS<small>J.S.A. STUDY SYSTEM</small></div>
+      <nav class="nav">${navItems.map(([id,icon,label]) => `<button class="${active===id?'active':''} ${['analytics','mock'].includes(id)?'secondary':''}" onclick="go('${id}')"><span>${icon}</span>${label}</button>`).join('')}</nav>
+      <div class="sidebar-note">Prototype v0.3<br>6-screen clickable validation build<br>Mock data / No DB write</div>
+    </aside>
+    <header class="mobile-header"><div class="logo">WINE EXPERT OS</div><span class="chip brand">Prototype</span></header>
+    <main class="main">${content}</main>
+    <nav class="bottom-nav">
+      ${[['home','⌂','HOME'],['quiz','▶','STUDY'],['review','↻','REVIEW'],['knowledge','⌕','KNOWLEDGE']].map(([id,icon,label])=>`<button class="${active===id?'active':''}" onclick="go('${id}')"><div>${icon}</div>${label}</button>`).join('')}
+    </nav>
+  </div>`;
+}
+
+function mockNote(){ return `<div class="mock-note"><strong>Prototype data:</strong> 画面内の数値・問題・教本ページは UI 操作検証用のモックです。J.S.A.教本の正本データはまだ接続していません。</div>`; }
+
+function home(){ return shell(`
+  <div class="eyebrow">Learning / Home</div><h1>Wine Expert 合格への道</h1><p class="page-lead">今日の積み重ねを、合格へ。復習予定と弱点から学習を始めよう。</p>
+  ${mockNote()}
+  <section class="card hero-card">
+    <div class="hero-title"><div><span class="chip brand">TODAY</span><h2 style="margin-top:12px">今日の学習</h2></div><div><div class="metric-big">20</div><div class="metric-label">questions</div></div></div>
+    <div class="stat-line"><span>復習 <strong>8</strong></span><span>弱点 <strong>5</strong></span><span>新規 <strong>7</strong></span><span>約 <strong>15分</strong></span></div>
+    <button class="btn primary" onclick="startQuiz(false)">今日の学習を開始</button>
+  </section>
+  <section class="section grid two">
+    <div class="card flat"><div class="section-head"><h2>Weak Topics</h2><span class="section-kicker">直近 Attempt ベース</span></div>
+      ${topicRow('Slovenia',42)}${topicRow('Canada',51)}${topicRow('Austria',58)}
+    </div>
+    <div class="card flat"><div class="section-head"><h2>Today's Progress</h2><span class="section-kicker">Today</span></div>
+      <div class="grid three" style="margin-top:24px"><div><div class="metric-big">25</div><div class="metric-label">問題</div></div><div><div class="metric-big">71%</div><div class="metric-label">正答率</div></div><div><div class="metric-big">18</div><div class="metric-label">分</div></div></div>
+    </div>
+  </section>`); }
+function topicRow(name,pct){ return `<div class="topic-row"><button class="linkish" onclick="openTopic('${name}')">${name}</button><strong>${pct}%</strong><div class="progress"><span style="width:${pct}%"></span></div></div>`; }
+
+function quiz(){
+  const q = demoQuestions[state.quizIndex];
+  return shell(`<div class="quiz-shell">
+    <div class="quiz-top"><button class="linkish" onclick="go('home')">← 終了</button><span>${state.quizIndex+3} / 20</span></div>
+    ${mockNote()}
+    <span class="chip brand">${state.reviewMode?'REVIEW':'STUDY'} · ${q.topic}</span>
+    <div class="question">${q.text}</div>
+    <div class="choice-list">${q.choices.map((c,i)=>`<button class="choice ${state.selectedChoice===i?'selected':''}" onclick="state.selectedChoice=${i};render()"><span class="choice-key">${String.fromCharCode(65+i)}</span><span class="choice-label"><span class="choice-local" lang="sl">${c.local}</span><span class="choice-ja" lang="ja">${c.ja}</span></span></button>`).join('')}</div>
+    <div class="confidence"><h3>自信度</h3><div class="confidence-grid">${[['unknown','分からない'],['guess','勘'],['narrowed_down','二択'],['certain','確信あり']].map(([id,label])=>`<button class="${state.confidence===id?'selected':''}" onclick="state.confidence='${id}';render()">${label}</button>`).join('')}</div></div>
+    <div class="quiz-actions"><button class="btn primary" ${state.selectedChoice===null||!state.confidence?'disabled':''} onclick="submitAnswer()">回答する</button></div>
+  </div>`);
+}
+
+function result(){
+  const q = demoQuestions[state.quizIndex]; const r = state.lastResult || {correct:true,selected:q.correct,confidence:'narrowed_down'};
+  const confLabel = {unknown:'分からない',guess:'勘',narrowed_down:'二択',certain:'確信あり'}[r.confidence];
+  return shell(`<div class="quiz-shell">
+    ${mockNote()}
+    <div class="result-banner ${r.correct?'success':'error'}"><div class="result-icon">${r.correct?'✓':'✕'}</div><div><strong style="font-size:20px">${r.correct?'正解':'不正解'}</strong><div style="margin-top:5px">あなたの回答 ${String.fromCharCode(65+r.selected)} ${q.choices[r.selected].local} / ${q.choices[r.selected].ja} · 自信度 ${confLabel}</div></div></div>
+    <section class="card flat" style="margin-top:18px"><h2>解説</h2><p>${q.explanation}</p>
+      <div class="accordion"><button onclick="state.accordionOpen=!state.accordionOpen;render()">選択肢を確認 <span>${state.accordionOpen?'▲':'▼'}</span></button>${state.accordionOpen?`<div class="accordion-content">${q.choices.map((c,i)=>`<div style="margin:8px 0"><strong>${String.fromCharCode(65+i)} ${c.local} / ${c.ja}</strong> — ${i===q.correct?'正解選択肢（プロトタイプ設定）':'選択肢解説はモック未登録'}</div>`).join('')}</div>`:''}</div>
+      <div class="divider"></div><h3>教本根拠</h3><div class="source-ref"><div><strong>${q.source}</strong><small>QuestionSource → Source を想定</small></div><button class="btn secondary" onclick="showSource()">根拠を見る</button></div>
+      <div class="divider"></div><h3>関連 Topic</h3><div class="browse">${q.related.map(t=>`<button class="chip" onclick="openTopic('${t}')">${t} ›</button>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px"><button class="linkish" onclick="state.favorite=!state.favorite;render()">${state.favorite?'★':'☆'} お気に入り</button><button class="btn primary" onclick="nextQuestion()">次の問題</button></div>
+    </section>
+    <div class="sticky-next"><button class="btn primary" onclick="nextQuestion()">次の問題</button></div>
+  </div>`);
+}
+
+function review(){ return shell(`
+  <div class="eyebrow">Learning / Review</div><h1>復習すべきものだけ。</h1><p class="page-lead">誤答一覧ではなく、ReviewSchedule を中心にした「今やるべき」復習キュー。</p>${mockNote()}
+  <section class="card hero-card"><div class="review-summary"><div><span class="chip warning">DUE TODAY</span><h2 style="margin-top:12px">今日の復習 18問</h2><p style="margin-bottom:0;color:var(--muted)">約12分 · priority_score は直接表示しない</p></div><button class="btn primary" onclick="startQuiz(true)">復習を開始</button></div></section>
+  <section class="card flat section"><div class="review-item"><div><button class="linkish" onclick="openTopic('Barolo DOCG')">Barolo 最低熟成</button><div class="review-meta">直近: 不正解 / 確信あり · 誤答 2</div></div><span class="chip warning">今日</span></div><div class="review-item"><div><button class="linkish" onclick="openTopic('山幸')">山幸の交配親</button><div class="review-meta">直近: 正解 / 勘</div></div><span class="chip warning">今日</span></div></section>
+  <section class="section"><div class="section-head"><h2>Weak Topics</h2><span class="section-kicker">Attempt + QuestionTopic</span></div><div class="card flat">${topicRow('Slovenia',42)}${topicRow('Canada',51)}</div></section>`); }
+
+function knowledge(){ return shell(`
+  <div class="eyebrow">Knowledge</div><h1>教本を、質問できる形に。</h1><p class="page-lead">自然言語を主役にしつつ、Topic / Fact / Source まで辿れる検索。</p>${mockNote()}
+  <div class="searchbar"><input id="knowledge-input" value="${escapeHtml(state.knowledgeQuery)}" placeholder="例：85%が登場する規定" oninput="state.knowledgeQuery=this.value"><button class="btn primary" onclick="state.knowledgeQuery=document.getElementById('knowledge-input').value;state.knowledgeSearched=true;render()">検索</button></div>
+  <div class="browse"><span class="section-kicker" style="padding:6px 0">BROWSE:</span>${['国・地域','品種','人物','法律・制度','醸造・栽培'].map(x=>`<button class="chip">${x}</button>`).join('')}</div>
+  ${state.knowledgeSearched?searchResults():`<section class="section grid two"><div class="card flat"><h2>検索の考え方</h2><p>AI Summary だけで完結せず、教本 Source と関連 Topic を別レイヤーで表示します。</p></div><div class="card flat"><h2>試す</h2><p>UI 設計書の検証シナリオに合わせて「85%が登場する規定」と検索してください。</p></div></section>`}
+  `); }
+function searchResults(){ return `<section class="section"><div class="ai-box"><div class="ai-label">AI SUMMARY · PROTOTYPE</div><p><strong>「${escapeHtml(state.knowledgeQuery)}」</strong> の検索結果をここに要約表示します。現在は教本 RAG 未接続のため、具体的な規定内容は生成しません。</p></div>
+    <div class="grid two" style="margin-top:18px"><div class="card flat"><div class="section-head"><h2>教本根拠</h2><span class="chip warning">3 Sources · mock</span></div><div class="source-ref"><div><strong>J.S.A.教本 p.xxx</strong><small>Source 1 · 未接続</small></div><button class="btn secondary" onclick="showSource()">見る</button></div></div><div class="card flat"><h2>関連 Topic</h2><div class="browse" style="margin-top:14px"><button class="chip" onclick="openTopic('Barolo DOCG')">Barolo DOCG ›</button><button class="chip" onclick="openTopic('GI Yamanashi')">GI Yamanashi ›</button></div><div style="margin-top:20px"><button class="btn secondary" onclick="startQuiz(false)">この内容から学習</button></div></div></div></section>`; }
+
+function topic(){ const name = state.topic;
+  return shell(`<div class="eyebrow">Knowledge / Topic Detail</div><div class="breadcrumb">Italy › Piemonte › Langhe</div><h1>${escapeHtml(name)}</h1><p class="page-lead">TopicType に依存しすぎない共通シェル。型別セクションは差し込み式。</p>${mockNote()}
+  <section class="grid two"><div class="card flat"><h2>重要ポイント</h2><ul><li>Nebbiolo（UI 例示値）</li><li>最低熟成 38 months（UI 例示値）</li></ul></div><div class="card flat"><h2>あなたの学習</h2><div class="grid two" style="margin-top:16px"><div><div class="metric-big">12</div><div class="metric-label">問題</div></div><div><div class="metric-big">67%</div><div class="metric-label">正答率</div></div></div><button class="btn primary" style="margin-top:20px" onclick="startQuiz(false)">この Topic を学習</button></div></section>
+  <section class="card flat section"><h2>Facts</h2><div class="fact-table" style="margin-top:12px"><div class="fact-row"><div class="label">主要品種</div><div><button class="linkish" onclick="openTopic('Nebbiolo')">Nebbiolo ›</button></div></div><div class="fact-row"><div class="label">最低熟成</div><div>38 months <span class="chip warning">mock</span></div></div></div></section>
+  <section class="card flat section"><h2>試験ポイント</h2><p>KeyPoint / Description を表示する領域。教本で確認できない内容を AI 一般知識で教本準拠として補完しない。</p></section>
+  <section class="grid two section"><div class="card flat"><h2>関連 Topic</h2><div class="browse" style="margin-top:14px"><button class="chip" onclick="openTopic('Nebbiolo')">Nebbiolo ›</button><button class="chip" onclick="openTopic('Barbaresco')">Barbaresco ›</button></div></div><div class="card flat"><h2>教本根拠</h2><div class="source-ref" style="margin-top:14px"><div><strong>p.xxx</strong><small>Source / TextbookEdition</small></div><button class="btn secondary" onclick="showSource()">Sourceを見る</button></div></div></section>`); }
+
+function showSource(){ document.getElementById('modal-root').innerHTML = `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><div><div class="eyebrow">Source Viewer Stub</div><h2 style="margin-top:8px">J.S.A.教本 p.xxx</h2></div><button class="close" onclick="closeModal()">×</button></div><div class="mock-note" style="margin-top:18px">初回6画面の対象外である SOURCE VIEWER の遷移確認用スタブです。画面仕様そのものを変更するものではありません。</div><p><strong>Verified / Active:</strong> Prototype only</p><div class="divider"></div><p>ここに Source.source_text を表示します。現在は正本教本データを接続していないため本文は表示しません。</p><div class="divider"></div><p class="section-kicker">Linked Facts / Questions / Topics / Images</p></div></div>`; }
+function closeModal(){ document.getElementById('modal-root').innerHTML=''; }
+function escapeHtml(s=''){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function render(){
+  const views = {home,quiz,result,review,knowledge,topic};
+  const fn = views[state.screen] || home;
+  document.getElementById('app').innerHTML = fn();
+}
+render();
+
+</script>
+</body>
+</html>
